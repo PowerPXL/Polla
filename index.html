@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Vem är största ministern?</title>
+  <style>
+    img { width: 200px; height: auto; display: block; margin: auto; }
+    .candidate { text-align: center; margin: 20px; display: inline-block; }
+    form { display: inline; }
+  </style>
+</head>
+<body>
+  <h1>Vem är största ministern?</h1>
+  <form method="POST" action="/vote">
+    <div class="candidate">
+      <img src="/static/images/kristersson.jpg" alt="Kristersson">
+      <button name="candidate" value="kristersson">Rösta på Ulf Kristersson</button>
+    </div>
+    <div class="candidate">
+      <img src="/static/images/svantesson.jpg" alt="Svantesson">
+      <button name="candidate" value="svantesson">Rösta på Elisabeth Svantesson</button>
+    </div>
+    <div class="candidate">
+      <img src="/static/images/forssell.jpg" alt="Forssell">
+      <button name="candidate" value="forssell">Rösta på Johan Forssell</button>
+    </div>
+  </form>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultat</title>
+</head>
+<body>
+  <h1>Röstningsresultat</h1>
+  <ul>
+    {% for candidate, count in results %}
+      <li>{{ candidate }}: {{ count }} röster</li>
+    {% endfor %}
+  </ul>
+  <a href="/">Tillbaka</a>
+</body>
+</html>
