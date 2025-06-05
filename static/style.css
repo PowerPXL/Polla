@@ -1,0 +1,127 @@
+/* Reset och grund */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background-color: #e0e0e0;
+  padding: 20px 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-box {
+  max-width: 800px;      /* Öka bredden från 600px till 800px */
+  margin: 20px auto 40px auto;
+  padding: 25px 30px;    /* Lite mer padding för luftighet */
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  color: #444;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.logo h1 {
+  margin: 0 0 10px 0;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+.info-box h2 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: 700;
+  border-bottom: 2px solid #a3c4f3; /* subtil färg under rubriken */
+  padding-bottom: 4px;
+}
+
+.info-box p {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* Main */
+main {
+  flex: 1;
+  padding: 30px 15px;
+}
+
+.candidates-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.candidate {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 220px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  text-decoration: none;
+}
+
+.candidate:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.candidate img {
+  width: 200px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.candidate button {
+  display: none;
+}
+
+button[type="submit"] {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  padding: 12px 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+/* Footer */
+footer {
+  background-color: #e0e0e0;
+  padding: 15px;
+  font-size: 0.85rem;
+  color: #666;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+}

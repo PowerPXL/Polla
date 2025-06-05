@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Flask environment
+.env
+venv/
+
+# VSCode
+.vscode/
+
+# OS-filer
+.DS_Store
+Thumbs.db

@@ -1,29 +1,61 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <title>Vem är största ministern?</title>
-  <style>
-    img { width: 200px; height: auto; display: block; margin: auto; }
-    .candidate { text-align: center; margin: 20px; display: inline-block; }
-    form { display: inline; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Polla.se ett alternativ till röstningssystemet</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <h1>Vem är största ministern?</h1>
-  <form method="POST" action="/vote">
-    <div class="candidate">
-      <img src="/static/images/kristersson.jpg" alt="Kristersson">
-      <button name="candidate" value="kristersson">Rösta på Ulf Kristersson</button>
+  <header>
+    <div class="logo">
+      <!-- Här kan du lägga in en logo eller text -->
+      <h1>Statsminister 2026</h1>
     </div>
-    <div class="candidate">
-      <img src="/static/images/svantesson.jpg" alt="Svantesson">
-      <button name="candidate" value="svantesson">Rösta på Elisabeth Svantesson</button>
-    </div>
-    <div class="candidate">
-      <img src="/static/images/forssell.jpg" alt="Forssell">
-      <button name="candidate" value="forssell">Rösta på Johan Forssell</button>
-    </div>
-  </form>
+<div class="info-box">
+  <h2>Projektet</h2>
+  <p>
+    Välkommen till vårt lilla, helt oberoende projekt som ger dig en chans att uttrycka din åsikt på ett enkelt och öppet sätt – som ett komplement till det officiella riksdagsvalet. Här handlar det om att skapa en ärlig bild av vad folk egentligen tycker, helt utan press eller påtryckningar.
+  </p>
+
+  <h2>Integritet och Säkerhet</h2>
+  <p>
+    Vi värnar om din integritet och säkerhet. Därför sparar vi inga personuppgifter och säljer inte vidare någon information. För att garantera att varje röst är unik och för att hålla allt rättvist använder vi en mild kontroll som kan inkludera en enkel bekräftelse via e-post. Det är snabbt, säkert och innebär inga andra krångliga steg.
+  </p>
+
+  <h2>Sprid vidare</h2>
+  <p>
+    Känner du att det här är något som fler borde veta om? Tipsa gärna dina vänner eller dela vidare i dina kanaler! Om du vill stödja oss och hjälpa projektet framåt finns en Patreon-sida där du kan bidra.
+  </p>
+</div>
+  </header>
+
+  <main>
+    <form method="POST" action="/vote">
+      <div class="candidates-container">
+        <label class="candidate" for="kristersson">
+          <img src="/static/images/kristersson.jpg" alt="Kristersson" />
+          <span>Rösta på Ulf Kristersson</span>
+          <input type="radio" name="candidate" value="kristersson" id="kristersson" style="display:none;" />
+        </label>
+
+        <label class="candidate" for="svantesson">
+          <img src="/static/images/svantesson.jpg" alt="Svantesson" />
+          <span>Rösta på Elisabeth Svantesson</span>
+          <input type="radio" name="candidate" value="svantesson" id="svantesson" style="display:none;" />
+        </label>
+
+        <label class="candidate" for="forssell">
+          <img src="/static/images/forssell.jpg" alt="Forssell" />
+          <span>Rösta på Johan Forssell</span>
+          <input type="radio" name="candidate" value="forssell" id="forssell" style="display:none;" />
+        </label>
+      </div>
+      <button type="submit">Rösta</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>© 2025 Polla.se – All rights reserved.</p>
+  </footer>
 </body>
 </html>

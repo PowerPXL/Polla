@@ -1,12 +1,16 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
 
 DB_FILE = 'database.db'
 
-# Initiera databasen
+# Definiera init_db FÖRST
 def init_db():
     if not os.path.exists(DB_FILE):
         conn = sqlite3.connect(DB_FILE)
@@ -46,7 +50,16 @@ def results():
     conn.close()
     return render_template('results.html', results=data)
 
+@app.route('/test-secret')
+def test_secret():
+    if app.secret_key:
+        return f"Secret key is set! Length: {len(app.secret_key)}"
+    else:
+        return "Secret key is NOT set!"
+
+# Kör servern EN gång
+### DEBUG MODE ###
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)
