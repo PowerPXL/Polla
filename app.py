@@ -22,7 +22,7 @@ def init_db():
                 count INTEGER NOT NULL
             )
         ''')
-        for candidate in ['kristersson', 'svantesson', 'forssell']:
+        for candidate in ['uffe', 'magda', 'jimmy', 'nooshi', 'annakarin', 'ebba', 'amandadaniel', 'romina']:
             c.execute("INSERT INTO votes (candidate, count) VALUES (?, ?)", (candidate, 0))
         conn.commit()
         conn.close()
@@ -45,10 +45,28 @@ def vote():
 def results():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT candidate, count FROM votes")
+    c.execute("SELECT candidate, count FROM votes ORDER BY count DESC")
     data = c.fetchall()
     conn.close()
-    return render_template('results.html', results=data)
+
+    total_votes = sum(count for _, count in data)
+    results = []
+    for i, (candidate, count) in enumerate(data, start=1):
+        procent = (count / total_votes * 100) if total_votes > 0 else 0
+        results.append({
+            "candidate": candidate,
+            "count": count,
+            "rank": i,
+            "procent": procent
+        })
+    return render_template('results.html', results=results)
+    
+    # Lägg till rankning (1, 2, 3)
+    ranked_results = []
+    for i, (candidate, count) in enumerate(data, start=1):
+        ranked_results.append({'candidate': candidate, 'count': count, 'rank': i})
+    
+    return render_template('results.html', results=ranked_results)
 
 @app.route('/test-secret')
 def test_secret():

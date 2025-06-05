@@ -1,16 +1,41 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <title>Resultat</title>
+  <meta charset="UTF-8" />
+  <title>Röstresultat – Statsminister 2026</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <h1>Röstningsresultat</h1>
-  <ul>
-    {% for candidate, count in results %}
-      <li>{{ candidate }}: {{ count }} röster</li>
+  <header>
+    <div class="logo">
+      <h1>Statsminister 2026 – Resultat</h1>
+    </div>
+  </header>
+
+  <main>
+     <div class="candidates-container">
+    {% for result in results %}
+    <div class="candidate-card {% if result.rank == 1 %}leader{% endif %}">
+      <div class="rank">
+        {% if result.rank == 1 %}
+          ⭐
+        {% else %}
+          {{ result.rank }}
+        {% endif %}
+      </div>
+      <img src="{{ url_for('static', filename='images/' + result.candidate + '.jpg') }}" alt="{{ result.candidate }}" />
+      <h3>{{ result.candidate | capitalize }}</h3>
+      <p>{{ result.count }} röster</p>
+      <div class="progress-bar">
+        <div class="progress" style="width: {{ result.procent }}%;"></div>
+      </div>
+    </div>
     {% endfor %}
-  </ul>
-  <a href="/">Tillbaka</a>
+  </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Polla.se – All rights reserved.</p>
+  </footer>
 </body>
 </html>
