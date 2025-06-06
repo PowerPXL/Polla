@@ -26,6 +26,7 @@ def init_db():
             c.execute("INSERT INTO votes (candidate, count) VALUES (?, ?)", (candidate, 0))
         conn.commit()
         conn.close()
+init_db()        
 
 @app.route('/')
 def index():
@@ -78,6 +79,5 @@ def test_secret():
 # Kör servern EN gång
 ### DEBUG MODE ###
 if __name__ == '__main__':
-    init_db()
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
