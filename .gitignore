@@ -6,6 +6,7 @@ __pycache__/
 
 # Flask environment
 .env
+.env.py
 venv/
 
 # VSCode
@@ -14,3 +15,6 @@ venv/
 # OS-filer
 .DS_Store
 Thumbs.db
+
+# Database
+database.db
