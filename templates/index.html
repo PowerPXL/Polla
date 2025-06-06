@@ -2,14 +2,17 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Polla.se ett alternativ till röstningssystemet</title>
+  <title>Polla.se|Ett fritt val</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
   <header>
     <div class="logo">
       <!-- Här kan du lägga in en logo eller text -->
-      <h1>Statsminister 2026</h1>
+      <h1>Polla.se|Ett fritt val</h1>
+        <p class="text-sm text-gray-600 italic flex items-center gap-2 select-none">
+    🧠 <span id="funFactText">Visste du att nästan 85 % av svenskarna röstade i senaste valet?</span>
+  </p>
     </div>
 <div class="info-box">
   <h2>Projektet</h2>
@@ -30,6 +33,9 @@
   </header>
 
  <main>
+    <h2 style="font-size: 1.5rem; margin-bottom: 10px;">Vem ska styra, lägg din fria röst</h2>
+  <form id="vote-form" method="POST" action="/vote">
+    <div class="candidates-container">
   <form method="POST" action="/vote">
     <div class="candidates-container">
       <label class="candidate" for="uffe">
@@ -80,14 +86,90 @@
         <input type="radio" name="candidate" value="romina" id="romina" style="display:none;" />
       </label>
     </div>
-
-    <button type="submit">Rösta</button>
   </form>
-</main>
-  </main>
+  <!-- Fun Fact-sektion -->
+<section class="mt-10 px-4">
+  <h2 class="text-3xl font-bold mb-6 text-center">🧠 Fun Facts</h2>
 
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Hur många röstar?</h3>
+      <p>Ca <strong>7,5 miljoner</strong> är röstberättigade.<br>Runt <strong>6,3 miljoner</strong> röstade 2022 (84,2 %).</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Hur ofta är det val?</h3>
+      <p>Var <strong>fjärde år</strong>, andra söndagen i september.<br>Du röstar i <strong>tre val samtidigt</strong>.</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Yngst och äldst</h3>
+      <p>Du måste fylla <strong>18 år</strong> senast på valdagen.<br>Äldsta som röstade 2022 var över <strong>100 år</strong>!</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Längst vid makten?</h3>
+      <p><strong>Socialdemokraterna</strong> har styrt i över <strong>70 år totalt</strong>.</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Förtidsröstning</h3>
+      <p><strong>40 %</strong> röstar i förväg.<br>Det kan göras upp till <strong>27 dagar</strong> innan valdagen.</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Kyrkovalet</h3>
+      <p>Endast <strong>~20 %</strong> röstar.<br>Men du får rösta redan vid <strong>16 års ålder</strong>.</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Vad kostar ett val?</h3>
+      <p>Ett riksdagsval kostar staten ca <strong>400 miljoner kr</strong>.</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
+      <h3 class="font-semibold text-lg mb-2">Morgonröstar du?</h3>
+      <p>Forskning visar att osäkra väljare ofta röstar <strong>tidigt på dagen</strong> – som för att “bli av med det”.</p>
+    </div>
+
+  </div>
+</section>
+
+</main>
   <footer>
     <p>© 2025 Polla.se. är ett fritt iniativ som drivs av :Pavent – alla rättigheter förbehållna.</p>
   </footer>
+
+  <!--JavaScript klickbara kort-->
+  <script>
+  document.querySelectorAll('.candidate').forEach(label => {
+    label.addEventListener('click', () => {
+      const input = label.querySelector('input[type="radio"]');
+      input.checked = true;
+      document.getElementById('vote-form').submit();
+    });
+  });
+</script>
+
+  <!--JavaScript fun facts rad header-->
+<script>
+  const facts = [
+  "En gång skickade ett parti valmaterial via brevduvor… det gick sådär...",  
+  "En brittisk kandidat kampanjade med en kanin i hatten – röstades in tack vare showen...",
+  "40 % av rösterna lämnades in i förväg 2022...",
+  "🦄Unicorn Party har ställt upp i val – drömmen om en magisk politisk värld lever kvar...",
+  "Socialdemokraterna har styrt mest i svensk historia..."
+  ];
+
+  let index = 0;
+  const factEl = document.getElementById("funFactText");
+
+  setInterval(() => {
+    index = (index + 1) % facts.length;
+    factEl.textContent = facts[index];
+  }, 7000);
+</script>
+
 </body>
 </html>

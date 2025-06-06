@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <title>Röstresultat – Statsminister 2026</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<meta charset="UTF-8">
+  <title>Polla.se|Ett fritt val</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header>
     <div class="logo">
-      <h1>Statsminister 2026 – Resultat</h1>
+      <!-- Här kan du lägga in en logo eller text -->
+      <h1>Polla.se|Ett fritt val</h1>
+        <p class="text-sm text-gray-600 italic flex items-center gap-2 select-none">
+    🧠 <span id="funFactText">Visste du att nästan 85 % av svenskarna röstade i senaste valet?</span>
+  </p>
     </div>
   </header>
 
@@ -23,7 +27,7 @@
           {{ result.rank }}
         {% endif %}
       </div>
-      <img src="{{ url_for('static', filename='images/' + result.candidate + '.jpg') }}" alt="{{ result.candidate }}" />
+      <img src="{{ url_for('static', filename='images/' + result.candidate + '.jpg') }}" alt="{{ result.candidate }}">
       <h3>{{ result.candidate | capitalize }}</h3>
       <p>{{ result.count }} röster</p>
       <div class="progress-bar">
@@ -37,5 +41,22 @@
   <footer>
     <p>© 2025 Polla.se – All rights reserved.</p>
   </footer>
+  <!--JavaScript fun facts rad header-->
+<script>
+  const facts = [
+  "En gång skickade ett parti valmaterial via brevduvor… det gick sådär...",
+  "En brittisk kandidat kampanjade med en kanin i hatten – röstades in tack vare showen...",
+  "40 % av rösterna lämnades in i förväg 2022...",
+  "🦄Unicorn Party har ställt upp i val – drömmen om en magisk politisk värld lever kvar...",
+  "Socialdemokraterna har styrt mest i svensk historia..."
+  ];
+  let index = 0;
+  const factEl = document.getElementById("funFactText");
+
+  setInterval(() => {
+    index = (index + 1) % facts.length;
+    factEl.textContent = facts[index];
+  }, 7000);
+</script>
 </body>
 </html>
