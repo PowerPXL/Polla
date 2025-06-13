@@ -1,32 +1,31 @@
 from flask import Flask, render_template, request, redirect
-import psycopg2
-from psycopg2.extras import RealDictCursor
+from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")  # Ha alltid en fallback under utveckling
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initiera databasen (om tabellen inte finns)
+db = SQLAlchemy(app)
+
+# Modell för votes
+class Vote(db.Model):
+    __tablename__ = 'votes'
+    id = db.Column(db.Integer, primary_key=True)
+    candidate = db.Column(db.String(100), unique=True, nullable=False)
+    count = db.Column(db.Integer, nullable=False, default=0)
+
+# Initiera databasen och populera kandidater (om inte finns)
 def init_db():
-    try:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        c = conn.cursor()
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS votes (
-                id SERIAL PRIMARY KEY,
-                candidate TEXT UNIQUE NOT NULL,
-                count INTEGER NOT NULL DEFAULT 0
-            )
-        ''')
-        candidates = ['uffe', 'magda', 'jimmy', 'nooshi', 'annakarin', 'ebba', 'amandadaniel', 'romina']
-        for candidate in candidates:
-            c.execute("INSERT INTO votes (candidate, count) VALUES (%s, 0) ON CONFLICT (candidate) DO NOTHING", (candidate,))
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print("Error initializing DB:", e)
+    db.create_all()
+    candidates = ['uffe', 'magda', 'jimmy', 'nooshi', 'annakarin', 'ebba', 'amandadaniel', 'romina']
+    for candidate in candidates:
+        if not Vote.query.filter_by(candidate=candidate).first():
+            db.session.add(Vote(candidate=candidate, count=0))
+    db.session.commit()
 
 init_db()
 
@@ -37,35 +36,22 @@ def index():
 @app.route('/vote', methods=['POST'])
 def vote():
     choice = request.form['candidate']
-    try:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        c = conn.cursor()
-        c.execute("UPDATE votes SET count = count + 1 WHERE candidate = %s", (choice,))
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print("Error during vote:", e)
+    vote_entry = Vote.query.filter_by(candidate=choice).first()
+    if vote_entry:
+        vote_entry.count += 1
+        db.session.commit()
     return redirect('/results')
 
 @app.route('/results')
 def results():
-    try:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        c = conn.cursor()
-        c.execute("SELECT candidate, count FROM votes ORDER BY count DESC")
-        data = c.fetchall()
-        conn.close()
-    except Exception as e:
-        print("Error fetching results:", e)
-        data = []
-
-    total_votes = sum(item['count'] for item in data)
+    votes = Vote.query.order_by(Vote.count.desc()).all()
+    total_votes = sum(v.count for v in votes)
     results = []
-    for i, item in enumerate(data, start=1):
-        procent = (item['count'] / total_votes * 100) if total_votes > 0 else 0
+    for i, vote in enumerate(votes, start=1):
+        procent = (vote.count / total_votes * 100) if total_votes > 0 else 0
         results.append({
-            "candidate": item['candidate'],
-            "count": item['count'],
+            "candidate": vote.candidate,
+            "count": vote.count,
             "rank": i,
             "procent": procent
         })
