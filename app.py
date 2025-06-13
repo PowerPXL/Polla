@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
@@ -8,8 +7,6 @@ app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")  # Ha alltid en fall
 DATABASE_URL = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
 
 # Modell för votes
 class Vote(db.Model):
