@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
 
@@ -8,25 +8,30 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-DB_FILE = 'database.db'
+# Läs Supabase/Postgres-connection från miljövariabel
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Definiera init_db FÖRST
+db = SQLAlchemy(app)
+
+# Definiera Vote-modell (ersätter SQLite-tabellen)
+class Vote(db.Model):
+    __tablename__ = 'votes'
+    id = db.Column(db.Integer, primary_key=True)
+    candidate = db.Column(db.String(50), nullable=False, unique=True)
+    count = db.Column(db.Integer, nullable=False, default=0)
+
+# Initiera databasen (skapa tabellen om den inte finns)
+@app.before_first_request
 def init_db():
-    if not os.path.exists(DB_FILE):
-        conn = sqlite3.connect(DB_FILE)
-        c = conn.cursor()
-        c.execute('''
-            CREATE TABLE votes (
-                id INTEGER PRIMARY KEY,
-                candidate TEXT NOT NULL,
-                count INTEGER NOT NULL
-            )
-        ''')
-        for candidate in ['uffe', 'magda', 'jimmy', 'nooshi', 'annakarin', 'ebba', 'amandadaniel', 'romina']:
-            c.execute("INSERT INTO votes (candidate, count) VALUES (?, ?)", (candidate, 0))
-        conn.commit()
-        conn.close()
-init_db()        
+    db.create_all()
+    # Om inga kandidater finns, lägg till dem
+    if Vote.query.count() == 0:
+        candidates = ['uffe', 'magda', 'jimmy', 'nooshi', 'annakarin', 'ebba', 'amandadaniel', 'romina']
+        for candidate in candidates:
+            vote = Vote(candidate=candidate, count=0)
+            db.session.add(vote)
+        db.session.commit()
 
 @app.route('/')
 def index():
@@ -35,39 +40,26 @@ def index():
 @app.route('/vote', methods=['POST'])
 def vote():
     choice = request.form['candidate']
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute("UPDATE votes SET count = count + 1 WHERE candidate = ?", (choice,))
-    conn.commit()
-    conn.close()
+    vote = Vote.query.filter_by(candidate=choice).first()
+    if vote:
+        vote.count += 1
+        db.session.commit()
     return redirect('/results')
 
 @app.route('/results')
 def results():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute("SELECT candidate, count FROM votes ORDER BY count DESC")
-    data = c.fetchall()
-    conn.close()
-
-    total_votes = sum(count for _, count in data)
+    votes = Vote.query.order_by(Vote.count.desc()).all()
+    total_votes = sum(v.count for v in votes)
     results = []
-    for i, (candidate, count) in enumerate(data, start=1):
-        procent = (count / total_votes * 100) if total_votes > 0 else 0
+    for i, v in enumerate(votes, start=1):
+        procent = (v.count / total_votes * 100) if total_votes > 0 else 0
         results.append({
-            "candidate": candidate,
-            "count": count,
+            "candidate": v.candidate,
+            "count": v.count,
             "rank": i,
             "procent": procent
         })
     return render_template('results.html', results=results)
-    
-    # Lägg till rankning (1, 2, 3)
-    ranked_results = []
-    for i, (candidate, count) in enumerate(data, start=1):
-        ranked_results.append({'candidate': candidate, 'count': count, 'rank': i})
-    
-    return render_template('results.html', results=ranked_results)
 
 @app.route('/test-secret')
 def test_secret():
@@ -76,8 +68,6 @@ def test_secret():
     else:
         return "Secret key is NOT set!"
 
-# Kör servern EN gång
-### DEBUG MODE ###
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
