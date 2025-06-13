@@ -1,37 +1,34 @@
 from flask import Flask, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-# Läs Supabase/Postgres-connection från miljövariabel
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-db = SQLAlchemy(app)
-
-# Definiera Vote-modell (ersätter SQLite-tabellen)
-class Vote(db.Model):
-    __tablename__ = 'votes'
-    id = db.Column(db.Integer, primary_key=True)
-    candidate = db.Column(db.String(50), nullable=False, unique=True)
-    count = db.Column(db.Integer, nullable=False, default=0)
-
-# Initiera databasen (skapa tabellen om den inte finns)
-@app.before_first_request
+# Initiera databasen (om tabellen inte finns)
 def init_db():
-    db.create_all()
-    # Om inga kandidater finns, lägg till dem
-    if Vote.query.count() == 0:
+    try:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS votes (
+                id SERIAL PRIMARY KEY,
+                candidate TEXT UNIQUE NOT NULL,
+                count INTEGER NOT NULL DEFAULT 0
+            )
+        ''')
         candidates = ['uffe', 'magda', 'jimmy', 'nooshi', 'annakarin', 'ebba', 'amandadaniel', 'romina']
         for candidate in candidates:
-            vote = Vote(candidate=candidate, count=0)
-            db.session.add(vote)
-        db.session.commit()
+            c.execute("INSERT INTO votes (candidate, count) VALUES (%s, 0) ON CONFLICT (candidate) DO NOTHING", (candidate,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Error initializing DB:", e)
+
+init_db()
 
 @app.route('/')
 def index():
@@ -40,22 +37,35 @@ def index():
 @app.route('/vote', methods=['POST'])
 def vote():
     choice = request.form['candidate']
-    vote = Vote.query.filter_by(candidate=choice).first()
-    if vote:
-        vote.count += 1
-        db.session.commit()
+    try:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        c = conn.cursor()
+        c.execute("UPDATE votes SET count = count + 1 WHERE candidate = %s", (choice,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Error during vote:", e)
     return redirect('/results')
 
 @app.route('/results')
 def results():
-    votes = Vote.query.order_by(Vote.count.desc()).all()
-    total_votes = sum(v.count for v in votes)
+    try:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        c = conn.cursor()
+        c.execute("SELECT candidate, count FROM votes ORDER BY count DESC")
+        data = c.fetchall()
+        conn.close()
+    except Exception as e:
+        print("Error fetching results:", e)
+        data = []
+
+    total_votes = sum(item['count'] for item in data)
     results = []
-    for i, v in enumerate(votes, start=1):
-        procent = (v.count / total_votes * 100) if total_votes > 0 else 0
+    for i, item in enumerate(data, start=1):
+        procent = (item['count'] / total_votes * 100) if total_votes > 0 else 0
         results.append({
-            "candidate": v.candidate,
-            "count": v.count,
+            "candidate": item['candidate'],
+            "count": item['count'],
             "rank": i,
             "procent": procent
         })
@@ -70,4 +80,4 @@ def test_secret():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=False, host='0.0.0.0', port=port)
