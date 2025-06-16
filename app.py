@@ -1,17 +1,18 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import psycopg2
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Skapa en global databasanslutning (enkelt men inte trådsäkert – duger för mindre appar)
+# --- Databasanslutning och init ---
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
-# Initiera databasen och skapa tabellen om den inte finns
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
@@ -33,11 +34,66 @@ def init_db():
 
 init_db()
 
+# --- Flask-Login setup ---
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+
+# --- OAuth setup ---
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    access_token_url='https://oauth2.googleapis.com/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    client_kwargs={'scope': 'openid email profile'},
+)
+
+# --- User klass och in-memory storage ---
+class User(UserMixin):
+    def __init__(self, id_, email):
+        self.id = id_
+        self.email = email
+
+users = {}
+
+@login_manager.user_loader
+def load_user(user_id):
+    return users.get(user_id)
+
+# --- Routes ---
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return f"Inloggad som {current_user.email} <br><a href='/logout'>Logga ut</a>"
+    else:
+        return "Inte inloggad <br><a href='/login'>Logga in med Google</a>"
+
+@app.route('/login')
+def login():
+    redirect_uri = url_for('authorize', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/authorize')
+def authorize():
+    token = google.authorize_access_token()
+    user_info = google.parse_id_token(token)
+    user = User(user_info['sub'], user_info['email'])
+    users[user.id] = user
+    login_user(user)
+    return redirect('/')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
 
 @app.route('/vote', methods=['POST'])
+@login_required
 def vote():
     choice = request.form['candidate']
     conn = get_db_connection()
@@ -77,4 +133,4 @@ def test_secret():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    a
+    app.run(host='0.0.0.0', port=port)
