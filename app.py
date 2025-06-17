@@ -149,3 +149,12 @@ def debug_vars():
         "client_secret_set": bool(os.getenv("GOOGLE_CLIENT_SECRET")),
         "client_secret_repr": repr(os.getenv("GOOGLE_CLIENT_SECRET"))
     }
+
+@app.route('/debug-env')
+def debug_env():
+    from flask import jsonify
+    return jsonify({
+        "GOOGLE_CLIENT_ID": os.getenv("GOOGLE_CLIENT_ID"),
+        "GOOGLE_CLIENT_SECRET": os.getenv("GOOGLE_CLIENT_SECRET"),
+        "SECRET_KEY": os.getenv("SECRET_KEY")
+    })
