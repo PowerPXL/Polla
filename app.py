@@ -140,3 +140,10 @@ def debug_redirect_uri():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
+@app.route('/debug-oauth-vars')
+def debug_oauth_vars():
+    return (
+        f"Client ID: {os.getenv('GOOGLE_CLIENT_ID')}<br>"
+        f"Client Secret: {('set' if os.getenv('GOOGLE_CLIENT_SECRET') else 'missing')}"
+    )
