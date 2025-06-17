@@ -142,8 +142,10 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port)
 
 @app.route('/debug-oauth-vars')
-def debug_oauth_vars():
-    return (
-        f"Client ID: {os.getenv('GOOGLE_CLIENT_ID')}<br>"
-        f"Client Secret: {('set' if os.getenv('GOOGLE_CLIENT_SECRET') else 'missing')}"
-    )
+def debug_vars():
+    return {
+        "client_id_raw": os.getenv("GOOGLE_CLIENT_ID"),
+        "client_id_repr": repr(os.getenv("GOOGLE_CLIENT_ID")),
+        "client_secret_set": bool(os.getenv("GOOGLE_CLIENT_SECRET")),
+        "client_secret_repr": repr(os.getenv("GOOGLE_CLIENT_SECRET"))
+    }
