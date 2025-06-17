@@ -49,7 +49,6 @@ google = oauth.register(
     api_base_url='https://www.googleapis.com/oauth2/v1/',
     userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
     client_kwargs={'scope': 'openid email profile'},
-    redirect_uri='https://www.polla.se/auth/callback'
 )
 
 
