@@ -138,3 +138,7 @@ def test_secret():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
+@app.route('/debug-redirect-uri')
+def debug_redirect_uri():
+    return url_for('authorize', _external=True)
