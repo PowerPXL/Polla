@@ -49,11 +49,9 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v1/',
     userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
-    client_kwargs={'scope': 'openid email profile'},
-    redirect_uri = "http://web-production-1167.up.railway.app/authorize"
+    client_kwargs={'scope': 'openid email profile'}
+    # REMOVE redirect_uri here!
 )
-
-
 
 # --- User klass och in-memory storage ---
 class User(UserMixin):
@@ -68,7 +66,6 @@ def load_user(user_id):
     return users.get(user_id)
 
 # --- Routes ---
-
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -79,6 +76,7 @@ def index():
 @app.route('/login')
 def login():
     redirect_uri = url_for('authorize', _external=True)
+    print("🔁 Redirect URI:", redirect_uri)
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/authorize')
@@ -135,10 +133,10 @@ def results():
 def test_secret():
     return f"Secret key is set! Length: {len(app.secret_key)}"
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
-
 @app.route('/debug-redirect-uri')
 def debug_redirect_uri():
     return url_for('authorize', _external=True)
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
