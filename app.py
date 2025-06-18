@@ -83,7 +83,7 @@ def authorize():
         token = google.authorize_access_token()
         print("[DEBUG] Token:", token)
 
-        resp = google.get('userinfo')
+        resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
         print("[DEBUG] Userinfo response:", resp)
 
         user_info = resp.json()
