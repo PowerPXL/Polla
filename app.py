@@ -89,7 +89,7 @@ def authorize():
         user_info = resp.json()
         print("[DEBUG] User info JSON:", user_info)
 
-        user = User(user_info['id'], user_info['email'])
+        user = User(user_info['sub'], user_info['email'])
         users[user.id] = user
         login_user(user)
         return redirect('/')
