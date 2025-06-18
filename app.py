@@ -89,14 +89,31 @@ def authorize():
         user_info = resp.json()
         print("[DEBUG] User info JSON:", user_info)
 
-        user = User(user_info['sub'], user_info['email'])
+        user_id = user_info.get('sub')
+        email = user_info.get('email')
+
+        if not user_id or not email:
+            return "User ID or email not found in user info", 400
+
+        user = User(user_id, email)
         users[user.id] = user
         login_user(user)
+
         return redirect('/')
     except Exception as e:
         import traceback
         traceback.print_exc()
         return f"OAuth Error: {str(e)}", 500
+
+
+    @app.route('/')
+def index():
+    if current_user.is_authenticated:
+        return f"Välkommen {current_user.id} ({current_user.email})!"
+    else:
+        return 'Du är inte inloggad.'
+    
+    
 
 @app.route('/logout')
 @login_required
