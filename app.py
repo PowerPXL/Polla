@@ -82,11 +82,14 @@ def login():
 @app.route('/authorize')
 def authorize():
     token = google.authorize_access_token()
-    user_info = google.parse_id_token(token)
-    user = User(user_info['sub'], user_info['email'])
+    resp = google.get('userinfo')  # Hämtar användardata med access token
+    user_info = resp.json()
+
+    user = User(user_info['id'], user_info['email'])  # 'id' istället för 'sub'
     users[user.id] = user
     login_user(user)
     return redirect('/')
+
 
 @app.route('/logout')
 @login_required
