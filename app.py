@@ -39,6 +39,8 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
 # --- OAuth setup ---
+oauth = OAuth(app)
+
 google = oauth.register(
     name='google',
     client_id=os.getenv("GOOGLE_CLIENT_ID"),
