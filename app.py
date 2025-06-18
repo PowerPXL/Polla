@@ -76,7 +76,7 @@ def index():
 @app.route('/login')
 def login():
     redirect_uri = url_for('authorize', _external=True)
-    print("🔁 Redirect URI:", redirect_uri)
+    print(f"[DEBUG] Redirect URI = {redirect_uri}")
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/authorize')
