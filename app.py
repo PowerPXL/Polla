@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import psycopg2
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
@@ -40,7 +40,6 @@ login_manager.login_view = "login"
 
 # --- OAuth setup ---
 oauth = OAuth(app)
-
 google = oauth.register(
     name='google',
     client_id=os.getenv("GOOGLE_CLIENT_ID"),
@@ -51,7 +50,7 @@ google = oauth.register(
     }
 )
 
-# --- User klass och in-memory storage ---
+# --- User-klass och in-memory storage ---
 class User(UserMixin):
     def __init__(self, id_, email):
         self.id = id_
@@ -105,15 +104,6 @@ def authorize():
         traceback.print_exc()
         return f"OAuth Error: {str(e)}", 500
 
-
-    @app.route('/')
-    def index():
-    if current_user.is_authenticated:
-        return f"Välkommen {current_user.id} ({current_user.email})!"
-    else:
-        return 'Du är inte inloggad.'
-    
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -155,6 +145,7 @@ def results():
 
     return render_template('results.html', results=results)
 
+# --- Debug routes ---
 @app.route('/test-secret')
 def test_secret():
     return f"Secret key is set! Length: {len(app.secret_key)}"
@@ -162,10 +153,6 @@ def test_secret():
 @app.route('/debug-redirect-uri')
 def debug_redirect_uri():
     return url_for('authorize', _external=True)
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
 
 @app.route('/debug-oauth-vars')
 def debug_vars():
@@ -178,9 +165,13 @@ def debug_vars():
 
 @app.route('/debug-env')
 def debug_env():
-    from flask import jsonify
     return jsonify({
         "GOOGLE_CLIENT_ID": os.getenv("GOOGLE_CLIENT_ID"),
         "GOOGLE_CLIENT_SECRET": os.getenv("GOOGLE_CLIENT_SECRET"),
         "SECRET_KEY": os.getenv("SECRET_KEY")
     })
+
+# --- Start ---
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
