@@ -107,12 +107,11 @@ def authorize():
 
 
     @app.route('/')
-def index():
+    def index():
     if current_user.is_authenticated:
         return f"Välkommen {current_user.id} ({current_user.email})!"
     else:
         return 'Du är inte inloggad.'
-    
     
 
 @app.route('/logout')
