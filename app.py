@@ -81,15 +81,24 @@ def login():
 
 @app.route('/authorize')
 def authorize():
-    token = google.authorize_access_token()
-    resp = google.get('userinfo')  # Hämtar användardata med access token
-    user_info = resp.json()
+    try:
+        token = google.authorize_access_token()
+        print("[DEBUG] Token:", token)
 
-    user = User(user_info['id'], user_info['email'])  # 'id' istället för 'sub'
-    users[user.id] = user
-    login_user(user)
-    return redirect('/')
+        resp = google.get('userinfo')
+        print("[DEBUG] Userinfo response:", resp)
 
+        user_info = resp.json()
+        print("[DEBUG] User info JSON:", user_info)
+
+        user = User(user_info['id'], user_info['email'])
+        users[user.id] = user
+        login_user(user)
+        return redirect('/')
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return f"OAuth Error: {str(e)}", 500
 
 @app.route('/logout')
 @login_required
