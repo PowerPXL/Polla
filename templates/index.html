@@ -143,11 +143,19 @@
 
   <!--JavaScript klickbara kort-->
   <script>
-  document.querySelectorAll('.candidate').forEach(label => {
+document.querySelectorAll('.candidate').forEach(label => {
     label.addEventListener('click', () => {
       const input = label.querySelector('input[type="radio"]');
       input.checked = true;
-      document.getElementById('vote-form').submit();
+
+      const isLoggedIn = {{ 'true' if logged_in else 'false' }};
+
+      if (isLoggedIn) {
+        document.getElementById('vote-form').submit();
+      } else {
+        // Skicka till login – efter login kan de komma tillbaka och rösta
+        window.location.href = "/login";
+      }
     });
   });
 </script>
