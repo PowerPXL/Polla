@@ -67,6 +67,7 @@ def login():
     # Hämta next-param för att veta vart vi ska efter inloggning
     next_page = request.args.get('next') or url_for('index')
     redirect_uri = url_for('authorize', _external=True, next=next_page)
+    print(f"🔁 Redirect URI sent to Google: {redirect_uri}")  # Lägg till denna
     return oauth.google.authorize_redirect(redirect_uri)
     
 @app.route('/authorize')
@@ -133,3 +134,6 @@ def results():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
+
+
