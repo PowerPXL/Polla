@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 import os
 import psycopg2
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
@@ -67,10 +67,10 @@ def index():
 
 @app.route('/login')
 def login():
-    # Hämta next-param för att veta vart vi ska efter inloggning
     next_page = request.args.get('next') or url_for('index')
-    redirect_uri = url_for('authorize', _external=True, next=next_page)
-    print(f"🔁 Redirect URI sent to Google: {redirect_uri}")  # Lägg till denna
+    session['next'] = next_page  # Spara next i session
+    redirect_uri = url_for('authorize', _external=True)  # UTAN ?next=...
+    print(f"🔁 Redirect URI sent to Google: {redirect_uri}")  
     return oauth.google.authorize_redirect(redirect_uri)
     
 @app.route('/authorize')
@@ -80,8 +80,7 @@ def authorize():
     user = User(user_info['sub'], user_info['email'])
     users[user.id] = user
     login_user(user)
-    # Hämta next och redirecta dit
-    next_page = request.args.get('next') or url_for('index')
+    next_page = session.pop('next', url_for('index'))  # Hämta och ta bort next från session
     return redirect(next_page)
     
 @app.route('/logout')
