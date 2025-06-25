@@ -60,10 +60,7 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    if current_user.is_authenticated:
-        return f"Inloggad som {current_user.email} <br><a href='/logout'>Logga ut</a>"
-    else:
-        return "Inte inloggad <br><a href='/login'>Logga in med Google</a>"
+    return render_template("index.html", logged_in=current_user.is_authenticated)
 
 @app.route('/login')
 def login():
