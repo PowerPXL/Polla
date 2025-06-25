@@ -67,33 +67,43 @@ def index():
 
 @app.route('/login')
 def login():
-    redirect_uri = url_for('authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
+    redirect_uri = url_for("authorize", _external=True, next=request.args.get("next"))
+    return oauth.google.authorize_redirect(redirect_uri)
 
 @app.route('/authorize')
 def authorize():
     try:
+        # 1. Hämta access token
         token = google.authorize_access_token()
 
+        # 2. Hämta användarinformation från Google
         resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
-
         user_info = resp.json()
 
+        # 3. Säkerställ att nödvändig information finns
         user_id = user_info.get('sub')
         email = user_info.get('email')
 
         if not user_id or not email:
             return "User ID or email not found in user info", 400
 
+        # 4. Skapa och logga in användaren
         user = User(user_id, email)
         users[user.id] = user
         login_user(user)
 
-        return redirect('/')
+        # 5. Spara eventuell extra info (frivilligt)
+        session["user"] = user_info
+
+        # 6. Redirecta till nästa sida, om specificerat
+        next_page = request.args.get("next") or url_for("index")
+        return redirect(next_page)
+
     except Exception as e:
         import traceback
         traceback.print_exc()
         return f"OAuth Error: {str(e)}", 500
+
 
 @app.route('/logout')
 @login_required
