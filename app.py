@@ -68,9 +68,10 @@ def index():
 @app.route('/login')
 def login():
     next_page = request.args.get('next') or url_for('index')
-    session['next'] = next_page  # Spara next i session
-    redirect_uri = url_for('authorize', _external=True)  # UTAN ?next=...
-    print(f"🔁 Redirect URI sent to Google: {redirect_uri}")  
+    session['next'] = next_page
+    print(f"[DEBUG] Saving next_page to session: {next_page}")
+    redirect_uri = url_for('authorize', _external=True)
+    print(f"[DEBUG] Redirect URI sent to Google: {redirect_uri}")
     return oauth.google.authorize_redirect(redirect_uri)
     
 @app.route('/authorize')
@@ -80,7 +81,10 @@ def authorize():
     user = User(user_info['sub'], user_info['email'])
     users[user.id] = user
     login_user(user)
-    next_page = session.pop('next', url_for('index'))  # Hämta och ta bort next från session
+
+    next_page = session.pop('next', url_for('index'))
+    print(f"[DEBUG] Redirecting to next_page: {next_page}")
+
     return redirect(next_page)
     
 @app.route('/logout')
