@@ -5,7 +5,10 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")
+secret_key = os.getenv("SECRET_KEY")
+if not secret_key:
+    raise RuntimeError("SECRET_KEY environment variable is not set!")
+app.secret_key = secret_key
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
