@@ -9,7 +9,6 @@ app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# --- Databasanslutning och init ---
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
@@ -34,11 +33,9 @@ def init_db():
 
 init_db()
 
-# --- Flask-Login setup ---
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
-# --- OAuth setup ---
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -50,7 +47,6 @@ google = oauth.register(
     }
 )
 
-# --- User-klass och in-memory storage ---
 class User(UserMixin):
     def __init__(self, id_, email):
         self.id = id_
@@ -62,7 +58,6 @@ users = {}
 def load_user(user_id):
     return users.get(user_id)
 
-# --- Routes ---
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -73,20 +68,16 @@ def index():
 @app.route('/login')
 def login():
     redirect_uri = url_for('authorize', _external=True)
-    print(f"[DEBUG] Redirect URI = {redirect_uri}")
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/authorize')
 def authorize():
     try:
         token = google.authorize_access_token()
-        print("[DEBUG] Token:", token)
 
         resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
-        print("[DEBUG] Userinfo response:", resp)
 
         user_info = resp.json()
-        print("[DEBUG] User info JSON:", user_info)
 
         user_id = user_info.get('sub')
         email = user_info.get('email')
@@ -145,33 +136,6 @@ def results():
 
     return render_template('results.html', results=results)
 
-# --- Debug routes ---
-@app.route('/test-secret')
-def test_secret():
-    return f"Secret key is set! Length: {len(app.secret_key)}"
-
-@app.route('/debug-redirect-uri')
-def debug_redirect_uri():
-    return url_for('authorize', _external=True)
-
-@app.route('/debug-oauth-vars')
-def debug_vars():
-    return {
-        "client_id_raw": os.getenv("GOOGLE_CLIENT_ID"),
-        "client_id_repr": repr(os.getenv("GOOGLE_CLIENT_ID")),
-        "client_secret_set": bool(os.getenv("GOOGLE_CLIENT_SECRET")),
-        "client_secret_repr": repr(os.getenv("GOOGLE_CLIENT_SECRET"))
-    }
-
-@app.route('/debug-env')
-def debug_env():
-    return jsonify({
-        "GOOGLE_CLIENT_ID": os.getenv("GOOGLE_CLIENT_ID"),
-        "GOOGLE_CLIENT_SECRET": os.getenv("GOOGLE_CLIENT_SECRET"),
-        "SECRET_KEY": os.getenv("SECRET_KEY")
-    })
-
-# --- Start ---
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
