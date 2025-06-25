@@ -83,7 +83,7 @@ def authorize():
     login_user(user)
 
     next_page = session.pop('next', url_for('index'))
-    print(f"[DEBUG] Redirecting to next_page: {next_page}")
+    print(f"[DEBUG] Redirecting user to next_page: {next_page}")
 
     return redirect(next_page)
     
